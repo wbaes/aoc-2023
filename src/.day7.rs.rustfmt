@@ -1,0 +1,110 @@
+pub mod day7 {
+    use std::fs::File;
+    use std::{io, usize};
+
+    #[derive(Debug)]
+    #[derive(PartialEq, Eq, PartialOrd, Ord)]
+    struct Hand {
+        rank: i32, // based on type of hand alone
+        cards: String,
+        bid: usize,
+    }
+
+    impl Hand {
+
+        fn set_rank(&mut self) {
+            let mut card_amounts = self.amount_of_cards();
+            let max = card_amounts.iter().max().unwrap();
+            if max == &5 {
+                self.rank = 7; // five of a kind
+            } else if max == &4 {
+                self.rank = 6; // four of a kind
+            } else if max == &3 {
+                let mut copy = card_amounts.clone();
+                copy.retain(|x| x == &3);
+                if copy.len() == 2 {
+                    self.rank = 5; // full house with joker
+                } else if card_amounts.contains(&2) {
+                    self.rank = 5; //full house  without joker
+                } else {
+                    self.rank = 4; // three of a kind
+                }
+            } else if max == &2 {
+                card_amounts.retain(|x| x == &2);
+                if card_amounts.len() == 2 {
+                    self.rank = 3; // two pair
+                } else {
+                    self.rank = 2; // one pair
+                }
+            } else {
+                self.rank = 1; // high card
+            }
+            println!("Rank {}", self.rank);
+        }
+
+        fn amount_of_cards(&self) -> Vec<i32> {
+            let mut card_amounts = vec![0;13];
+            for hand in self.cards.chars() {
+                match hand {
+                    'Z' => card_amounts[0] += 1,
+                    'Y' => card_amounts[1] += 1,
+                    'X' => card_amounts[2] += 1,
+                    'A' => card_amounts = card_amounts.iter().map(|c| c + 1).collect(), // Joker
+                    'V' => card_amounts[4] += 1,
+                    '9' => card_amounts[5] += 1,
+                    '8' => card_amounts[6] += 1,
+                    '7' => card_amounts[7] += 1,
+                    '6' => card_amounts[8] += 1,
+                    '5' => card_amounts[9] += 1,
+                    '4' => card_amounts[10] += 1,
+                    '3' => card_amounts[11] += 1,
+                    '2' => card_amounts[12] += 1,
+                    _ => panic!("Unknown card type")
+                };
+            }
+            println!("amounts for hand {}: {:?}", self.cards, card_amounts);
+            card_amounts
+        }
+    }
+
+    pub fn calculate(lines: io::Result<io::Lines<io::BufReader<File>>>) {
+        let hands = get_input(lines);
+        let mut winnings:usize = 0;
+        for i in 0..hands.len() {
+            winnings += hands[i].bid * (hands.len() - i);
+        }
+        println!("total winnings: {}", winnings);
+
+    }
+
+    fn get_input(lines: io::Result<io::Lines<io::BufReader<File>>>) -> Vec<Hand> {
+        let mut hands_bids: Vec<Hand> = Vec::new();
+        match lines {
+            Ok(lines) => {
+                for line in lines {
+                    if let Ok(ip) = line {
+                        let split: Vec<&str> = ip.split(' ').collect();
+                        hands_bids.push(Hand {cards: split[0].replace("A", "Z").replace("K", "Y").replace("Q", "X").replace("J", "A").replace("T", "V").to_owned(), bid: split[1].parse().expect("Bid is not a number!"), rank: 0});
+                    }
+                }
+                println!("hands and bids: {:?}", hands_bids);
+            },
+            Err(_) => panic!("Couldn't read file"),
+        };
+        hands_bids.iter_mut().for_each(|h| h.set_rank());
+        hands_bids.sort_unstable_by(|a, b| b.cmp(a));
+        println!("hands ordered: {:?}", hands_bids);
+        hands_bids
+    }
+
+    #[cfg(test)]
+    #[test]
+    fn example_1() {
+    }
+    #[test]
+    fn example_2() {
+    }
+}
+
+
+

@@ -4,7 +4,9 @@ use crate::read_file::read_file::read_file;
 pub mod read_file;
 pub mod day1;
 pub mod day2;
+pub mod day3;
 pub mod day6;
+pub mod day7;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -15,7 +17,9 @@ fn main() {
     match day {
         1 => day1::day1::calculate(lines),
         2 => day2::day2::calculate(lines),
+        3 => day3::day3::calculate(lines),
         6 => day6::day6::calculate(lines),
+        7 => day7::day7::calculate(lines),
         _ => println!("please subnit a valid day.")
     };
 }
